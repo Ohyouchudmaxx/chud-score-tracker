@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chudmaxxing Score Tracker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+  <style>
+    :root {
+      --color-text-primary: #1F2937;
+      --color-text-secondary: #6B7280;
+      --color-text-tertiary: #9CA3AF;
+      --color-background-primary: #FFFFFF;
+      --color-background-secondary: #F9FAFB;
+      --color-background-tertiary: #F3F4F6;
+      --color-border-primary: #E5E7EB;
+      --color-border-secondary: #D1D5DB;
+      --color-border-tertiary: #E5E7EB;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-text-primary: #F3F4F6;
+        --color-text-secondary: #D1D5DB;
+        --color-text-tertiary: #9CA3AF;
+        --color-background-primary: #111827;
+        --color-background-secondary: #1F2937;
+        --color-background-tertiary: #374151;
+        --color-border-primary: #4B5563;
+        --color-border-secondary: #374151;
+        --color-border-tertiary: #2D3748;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      padding-bottom: 1.5rem;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .app {
+      max-width: 680px;
+      padding: 1.5rem 1rem;
+      font-family: var(--font-sans);
+    }
+
+    .tier-card {
+      border-radius: var(--border-radius-lg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      border: 1px solid var(--color-border-tertiary);
+      background: var(--color-background-secondary);
+      display: none;
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tier-card.visible {
+      display: block;
+    }
+
+    .tier-name {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tier-score {
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1;
+      margin: 12px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tier-desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .bar-wrap {
+      background: var(--color-background-primary);
+      border-radius: 99px;
+      height: 8px;
+      margin-top: 16px;
+      overflow: hidden;
+      border: 1px solid var(--color-border-tertiary);
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+      margin-top: 1.5rem;
+    }
+
+    .inputs {
+      background: var(--color-background-primary);
+      border: 1px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-border-tertiary);
+    }
+
+    .input-row:last-child {
+      border-bottom: none;
+    }
+
+    .input-icon {
+      font-size: 20px;
+      color: var(--color-text-secondary);
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .input-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .input-sub {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .time-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-field {
+      text-align: center;
+      font-size: 14px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 8px 10px;
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      width: 60px;
+      font-weight: 500;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-unit {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .toggle-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-btn {
+      padding: 8px 12px;
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-border-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--color-background-secondary);
+      color: var(--color-text-secondary);
+      transition: all 0.15s;
+      font-weight: 500;
+    }
+
+    .toggle-btn:hover {
+      border-color: var(--color-border-primary);
+      background: var(--color-background-tertiary);
+    }
+
+    .toggle-btn.selected {
+      background: #3B82F6;
+      color: white;
+      border-color: #3B82F6;
+    }
+
+    .meal-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--color-border-tertiary);
+    }
+
+    .meal-section:last-child {
+      border-bottom: none;
+    }
+
+    .meal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .meal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .size-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .size-btn {
+      flex: 1;
+      min-width: 70px;
+      padding: 8px 6px;
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-border-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      background: var(--color-background-secondary);
+      color: var(--color-text-secondary);
+      text-align: center;
+      transition: all 0.15s;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    .size-btn:hover {
+      border-color: var(--color-border-primary);
+      background: var(--color-background-tertiary);
+    }
+
+    .size-btn.selected {
+      color: white;
+      border-color: #3B82F6;
+      font-weight: 600;
+      background: #3B82F6;
+    }
+
+    .size-btn.size-none.selected {
+      background: #6B7280;
+      border-color: #6B7280;
+    }
+
+    .size-btn.size-snack.selected {
+      background: #10B981;
+      border-color: #10B981;
+    }
+
+    .size-btn.size-meal.selected {
+      background: #0EA5E9;
+      border-color: #0EA5E9;
+    }
+
+    .size-btn.size-feast.selected {
+      background: #F59E0B;
+      border-color: #F59E0B;
+    }
+
+    .size-btn.size-goy.selected {
+      background: #EF4444;
+      border-color: #EF4444;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-label {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      min-width: 40px;
+      font-weight: 500;
+    }
+
+    .slider-label.right {
+      text-align: right;
+    }
+
+    .slop-slider {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(to right, #10B981, #F59E0B, #EF4444);
+    }
+
+    .slop-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #3B82F6;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .slop-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #3B82F6;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .slider-val {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      text-align: center;
+      margin-top: 6px;
+      min-height: 16px;
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--border-radius-md);
+      background: #3B82F6;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      margin: 1.5rem 0;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calc-btn:hover {
+      background: #2563EB;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .calc-btn:active {
+      transform: translateY(0);
+    }
+
+    .friends {
+      background: var(--color-background-primary);
+      border: 1px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .friend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      transition: background 0.2s;
+    }
+
+    .friend:last-child {
+      border-bottom: none;
+    }
+
+    .friend:hover {
+      background: var(--color-background-secondary);
+    }
+
+    .you-row {
+      background: var(--color-background-secondary);
+      font-weight: 600;
+      border-bottom: 2px solid #3B82F6;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      color: white;
+    }
+
+    .rank {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      min-width: 28px;
+      font-weight: 600;
+    }
+
+    .friend-name {
+      flex: 1;
+      font-size: 14px;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .friend-tier {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+
+    .friend-score {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .share-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-secondary);
+      border: 1px solid var(--color-border-secondary);
+      font-size: 14px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 1rem;
+      transition: all 0.15s;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .share-btn.visible {
+      display: flex;
+    }
+
+    .share-btn:hover {
+      background: var(--color-background-tertiary);
+      border-color: var(--color-border-primary);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10B981;
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--border-radius-md);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 99;
+      white-space: nowrap;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .tier-score {
+        font-size: 56px;
+      }
+
+      .size-btn {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 6px 4px;
+      }
+
+      .toggle-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app">
+      <h2 class="sr-only">Chudmaxxing daily score tracker — satirical loser metrics with meal slop slider</h2>
+
+      <div class="header">
+        <h1>🔴 Chudmaxxing</h1>
+        <p>How much of a chud were you today? Submit your stats to find out.</p>
+      </div>
+
+      <div class="tier-card" id="result-card">
+        <div class="tier-name" id="tier-name"></div>
+        <div class="tier-score" id="score-display"></div>
+        <div class="tier-desc" id="tier-desc"></div>
+        <div class="bar-wrap"><div class="bar-fill" id="score-bar" style="width:0%;"></div></div>
+      </div>
+
+      <div class="section-title">📊 Daily Metrics</div>
+      <div class="inputs">
+        <div class="input-row">
+          <i class="ti ti-device-mobile input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">Screen Time</div>
+            <div class="input-sub">More = better chud score</div>
+          </div>
+          <div class="time-wrap">
+            <input class="input-field" type="number" id="screen-hr" min="0" max="24" value="0" />
+            <span class="input-unit">hr</span>
+            <input class="input-field" type="number" id="screen-min" min="0" max="59" value="0" />
+            <span class="input-unit">min</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <i class="ti ti-sun-off input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">Sun Exposure</div>
+            <div class="input-sub">Less = better chud score</div>
+          </div>
+          <div class="time-wrap">
+            <input class="input-field" type="number" id="sun-hr" min="0" max="24" value="0" />
+            <span class="input-unit">hr</span>
+            <input class="input-field" type="number" id="sun-min" min="0" max="59" value="0" />
+            <span class="input-unit">min</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <i class="ti ti-user-x input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">Women Spoken To</div>
+            <div class="input-sub">Lower = better chud score</div>
+          </div>
+          <div class="time-wrap">
+            <input class="input-field" type="number" id="women" min="0" max="99" value="0" />
+            <span class="input-unit">ppl</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <i class="ti ti-users input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">People Spoken To</div>
+            <div class="input-sub">Lower = better chud score</div>
+          </div>
+          <div class="time-wrap">
+            <input class="input-field" type="number" id="people" min="0" max="999" value="0" />
+            <span class="input-unit">ppl</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <i class="ti ti-droplet-off input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">Skipped Shower?</div>
+            <div class="input-sub">No shower = bonus points</div>
+          </div>
+          <div class="toggle-wrap">
+            <button class="toggle-btn" id="shower-no" onclick="selectToggle('shower','no')">No</button>
+            <button class="toggle-btn selected" id="shower-yes" onclick="selectToggle('shower','yes')">Yes (skipped)</button>
+          </div>
+        </div>
+        <div class="input-row">
+          <i class="ti ti-run input-icon" aria-hidden="true"></i>
+          <div>
+            <div class="input-label">Skipped Exercise?</div>
+            <div class="input-sub">No exercise = bonus points</div>
+          </div>
+          <div class="toggle-wrap">
+            <button class="toggle-btn" id="exercise-no" onclick="selectToggle('exercise','no')">No</button>
+            <button class="toggle-btn selected" id="exercise-yes" onclick="selectToggle('exercise','yes')">Yes (skipped)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">🍔 Today's Slop Report</div>
+      <div class="inputs">
+
+        <div class="meal-section" id="meal-breakfast">
+          <div class="meal-header">
+            <i class="ti ti-coffee" style="font-size:18px; color:var(--color-text-secondary)" aria-hidden="true"></i>
+            <span class="meal-title">Breakfast</span>
+          </div>
+          <div class="size-btns">
+            <button class="size-btn size-none selected" onclick="selectSize('breakfast',this,0)">None</button>
+            <button class="size-btn size-snack" onclick="selectSize('breakfast',this,1)">Snack</button>
+            <button class="size-btn size-meal" onclick="selectSize('breakfast',this,2)">Meal</button>
+            <button class="size-btn size-feast" onclick="selectSize('breakfast',this,3)">Feast</button>
+            <button class="size-btn size-goy" onclick="selectSize('breakfast',this,4)">Slop</button>
+          </div>
+          <div class="slider-wrap" id="breakfast-slider-wrap" style="opacity:0.3; pointer-events:none;">
+            <span class="slider-label">Salad</span>
+            <input type="range" class="slop-slider" id="breakfast-slider" min="0" max="10" step="1" value="5" oninput="updateSliderLabel('breakfast')" />
+            <span class="slider-label right">Slop</span>
+          </div>
+          <div class="slider-val" id="breakfast-slider-val"></div>
+        </div>
+
+        <div class="meal-section" id="meal-lunch">
+          <div class="meal-header">
+            <i class="ti ti-salad" style="font-size:18px; color:var(--color-text-secondary)" aria-hidden="true"></i>
+            <span class="meal-title">Lunch</span>
+          </div>
+          <div class="size-btns">
+            <button class="size-btn size-none selected" onclick="selectSize('lunch',this,0)">None</button>
+            <button class="size-btn size-snack" onclick="selectSize('lunch',this,1)">Snack</button>
+            <button class="size-btn size-meal" onclick="selectSize('lunch',this,2)">Meal</button>
+            <button class="size-btn size-feast" onclick="selectSize('lunch',this,3)">Feast</button>
+            <button class="size-btn size-goy" onclick="selectSize('lunch',this,4)">Slop</button>
+          </div>
+          <div class="slider-wrap" id="lunch-slider-wrap" style="opacity:0.3; pointer-events:none;">
+            <span class="slider-label">Salad</span>
+            <input type="range" class="slop-slider" id="lunch-slider" min="0" max="10" step="1" value="5" oninput="updateSliderLabel('lunch')" />
+            <span class="slider-label right">Slop</span>
+          </div>
+          <div class="slider-val" id="lunch-slider-val"></div>
+        </div>
+
+        <div class="meal-section" id="meal-dinner">
+          <div class="meal-header">
+            <i class="ti ti-moon" style="font-size:18px; color:var(--color-text-secondary)" aria-hidden="true"></i>
+            <span class="meal-title">Dinner</span>
+          </div>
+          <div class="size-btns">
+            <button class="size-btn size-none selected" onclick="selectSize('dinner',this,0)">None</button>
+            <button class="size-btn size-snack" onclick="selectSize('dinner',this,1)">Snack</button>
+            <button class="size-btn size-meal" onclick="selectSize('dinner',this,2)">Meal</button>
+            <button class="size-btn size-feast" onclick="selectSize('dinner',this,3)">Feast</button>
+            <button class="size-btn size-goy" onclick="selectSize('dinner',this,4)">Slop</button>
+          </div>
+          <div class="slider-wrap" id="dinner-slider-wrap" style="opacity:0.3; pointer-events:none;">
+            <span class="slider-label">Salad</span>
+            <input type="range" class="slop-slider" id="dinner-slider" min="0" max="10" step="1" value="5" oninput="updateSliderLabel('dinner')" />
+            <span class="slider-label right">Slop</span>
+          </div>
+          <div class="slider-val" id="dinner-slider-val"></div>
+        </div>
+
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">Calculate My Chud Score</button>
+
+      <div class="section-title">🏆 Leaderboard</div>
+      <div class="friends" id="friends-list"></div>
+
+      <button class="share-btn" id="share-btn" onclick="shareScore()">
+        <i class="ti ti-share" aria-hidden="true"></i>
+        Share My Chud Score
+      </button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const tiers = [
+      { min:0,   max:19,  name:"Normie",           desc:"You went outside and talked to people. Disgusting.",     selfDep:"a functioning member of society (embarrassing)",     color:"#10B981", bar:"#34D399" },
+      { min:20,  max:39,  name:"Basement Dweller", desc:"Showing promise. Touch less grass.",                     selfDep:"a Basement Dweller in training",                     color:"#0EA5E9", bar:"#38BDF8" },
+      { min:40,  max:59,  name:"Couch King",        desc:"The couch has learned your shape.",                    selfDep:"a certified Couch King. The cushions fear me",       color:"#8B5CF6", bar:"#A78BFA" },
+      { min:60,  max:79,  name:"Cave Troll",        desc:"Sunlight is a distant memory.",                        selfDep:"a full Cave Troll. Vitamin D is a myth",             color:"#F59E0B", bar:"#FCD34D" },
+      { min:80,  max:99,  name:"Omega Chud",        desc:"Your mom asked if you're still alive.",                selfDep:"an Omega Chud. My mom slid food under the door",     color:"#EF4444", bar:"#F87171" },
+      { min:100, max:100, name:"Legendary Chud",    desc:"A perfect score. We are not proud of you.",            selfDep:"a Legendary Chud. Scientists want to study me",      color:"#7C3AED", bar:"#A78BFA" },
+    ];
+
+    const friends = [
+      { name:"BasementBrad",    score:87, tier:"Omega Chud",       initials:"BB", bg:"#EF4444", col:"#FFFFFF" },
+      { name:"CouchLord99",     score:71, tier:"Cave Troll",        initials:"CL", bg:"#F59E0B", col:"#FFFFFF" },
+      { name:"You",             score:0,  tier:"Not submitted yet", initials:"ME", bg:"#3B82F6", col:"#FFFFFF", isYou:true },
+      { name:"GremlinKing",     score:55, tier:"Couch King",        initials:"GK", bg:"#8B5CF6", col:"#FFFFFF" },
+      { name:"DaylightAllergy", score:33, tier:"Basement Dweller",  initials:"DA", bg:"#0EA5E9", col:"#FFFFFF" },
+    ];
+
+    const sliderLabels = ["Pure salad energy","Mostly virtuous","Borderline decent","Neutral slop","Heading somewhere bad","Concerning choices","Definite slop","Heavy slop","Deep slop territory","Almost goy slop","Full goy slop"];
+    const sizeMultiplier = [0, 0.5, 1, 1.75, 2.5];
+    const meals = { breakfast: { size:0, slop:5 }, lunch: { size:0, slop:5 }, dinner: { size:0, slop:5 } };
+    let showerSkipped = true;
+    let exerciseSkipped = true;
+    let currentScore = 0;
+    let currentTier = tiers[0];
+
+    function selectSize(meal, btn, val) {
+      const section = document.getElementById('meal-' + meal);
+      section.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      meals[meal].size = val;
+      const sliderWrap = document.getElementById(meal + '-slider-wrap');
+      const sliderVal = document.getElementById(meal + '-slider-val');
+      if (val === 0) {
+        sliderWrap.style.opacity = '0.3';
+        sliderWrap.style.pointerEvents = 'none';
+        sliderVal.textContent = '';
+      } else {
+        sliderWrap.style.opacity = '1';
+        sliderWrap.style.pointerEvents = 'auto';
+        updateSliderLabel(meal);
+      }
+    }
+
+    function updateSliderLabel(meal) {
+      const val = parseInt(document.getElementById(meal + '-slider').value);
+      meals[meal].slop = val;
+      document.getElementById(meal + '-slider-val').textContent = sliderLabels[val];
+    }
+
+    function selectToggle(type, val) {
+      if (type === 'shower') {
+        showerSkipped = val === 'yes';
+        document.getElementById('shower-yes').classList.toggle('selected', showerSkipped);
+        document.getElementById('shower-no').classList.toggle('selected', !showerSkipped);
+      } else {
+        exerciseSkipped = val === 'yes';
+        document.getElementById('exercise-yes').classList.toggle('selected', exerciseSkipped);
+        document.getElementById('exercise-no').classList.toggle('selected', !exerciseSkipped);
+      }
+    }
+
+    function getTier(score) {
+      return tiers.find(t => score >= t.min && score <= t.max) || tiers[0];
+    }
+
+    function mealScore(meal) {
+      if (meals[meal].size === 0) return 0;
+      const slopFactor = meals[meal].slop / 10;
+      const sizeFactor = sizeMultiplier[meals[meal].size];
+      return slopFactor * sizeFactor * 10;
+    }
+
+    function calculate() {
+      const screenMins = (parseFloat(document.getElementById('screen-hr').value)||0)*60 + (parseFloat(document.getElementById('screen-min').value)||0);
+      const sunMins    = (parseFloat(document.getElementById('sun-hr').value)||0)*60   + (parseFloat(document.getElementById('sun-min').value)||0);
+      const women      = parseInt(document.getElementById('women').value)||0;
+      const people     = parseInt(document.getElementById('people').value)||0;
+
+      let score = 0;
+      score += Math.min(screenMins / (16*60) * 25, 25);
+      score += Math.max(0, (1 - Math.min(sunMins, 480) / 480) * 15);
+      score += Math.max(0, (1 - Math.min(women, 10) / 10) * 8);
+      score += Math.max(0, (1 - Math.min(people, 20) / 20) * 7);
+      score += showerSkipped ? 5 : 0;
+      score += exerciseSkipped ? 5 : 0;
+      score += Math.min(mealScore('breakfast') + mealScore('lunch') + mealScore('dinner'), 35);
+
+      currentScore = Math.min(100, Math.max(0, Math.round(score)));
+      currentTier = getTier(currentScore);
+
+      document.getElementById('score-display').textContent = currentScore;
+      document.getElementById('score-display').style.color = currentTier.color;
+      document.getElementById('tier-name').textContent = currentTier.name;
+      document.getElementById('tier-desc').textContent = currentTier.desc;
+      document.getElementById('score-bar').style.width = currentScore + '%';
+      document.getElementById('score-bar').style.background = currentTier.bar;
+      document.getElementById('result-card').classList.add('visible');
+      document.getElementById('share-btn').classList.add('visible');
+
+      friends.find(f => f.isYou).score = currentScore;
+      friends.find(f => f.isYou).tier = currentTier.name;
+      renderFriends();
+      document.getElementById('result-card').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    function renderFriends() {
+      const sorted = [...friends].sort((a, b) => b.score - a.score);
+      document.getElementById('friends-list').innerHTML = sorted.map((f, i) => `
+        <div class="friend ${f.isYou ? 'you-row' : ''}">
+          <span class="rank">#${i+1}</span>
+          <div class="avatar" style="background:${f.bg}; color:${f.col}">${f.initials}</div>
+          <div style="flex:1">
+            <div class="friend-name">${f.isYou ? 'You' : f.name}</div>
+            <div class="friend-tier">${f.tier}</div>
+          </div>
+          <div class="friend-score">${f.score}</div>
+        </div>
+      `).join('');
+    }
+
+    function shareScore() {
+      const siteUrl = 'https://ohyouchudmaxx.github.io/chud-score-tracker';
+      const text = `I am ${currentTier.selfDep}.\n\nMy Chudmaxxing score today: ${currentScore}/100\n"${currentTier.desc}"\n\nVisit ${siteUrl} to determine your own Chud score.`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => showToast('Copied! Go share your shame.'));
+      } else {
+        showToast('Score: ' + currentScore + ' — ' + currentTier.name);
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    renderFriends();
+  </script>
+</body>
+</html>
