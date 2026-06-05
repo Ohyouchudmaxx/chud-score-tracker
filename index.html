@@ -503,35 +503,6 @@
       text-align: right;
     }
 
-    .share-btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: var(--border-radius-md);
-      background: var(--color-background-secondary);
-      border: 1px solid var(--color-border-secondary);
-      font-size: 14px;
-      color: var(--color-text-primary);
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 1rem;
-      transition: all 0.15s;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .share-btn.visible {
-      display: flex;
-    }
-
-    .share-btn:hover {
-      background: var(--color-background-tertiary);
-      border-color: var(--color-border-primary);
-    }
-
     .toast {
       position: fixed;
       bottom: 20px;
@@ -555,6 +526,127 @@
       opacity: 1;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      background: var(--color-background-primary);
+      border-radius: var(--border-radius-lg);
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-emoji {
+      font-size: 64px;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .modal-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-tier {
+      font-size: 16px;
+      color: var(--color-text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .modal-message {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-btn {
+      padding: 12px 20px;
+      border-radius: var(--border-radius-md);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-btn-primary {
+      background: #3B82F6;
+      color: white;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .modal-btn-primary:hover {
+      background: #2563EB;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .modal-btn-secondary {
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border-secondary);
+    }
+
+    .modal-btn-secondary:hover {
+      background: var(--color-background-tertiary);
+      border-color: var(--color-border-primary);
+    }
+
     @media (max-width: 480px) {
       .header h1 {
         font-size: 24px;
@@ -574,6 +666,18 @@
         font-size: 12px;
         padding: 6px 10px;
       }
+
+      .modal {
+        padding: 1.5rem;
+      }
+
+      .modal-emoji {
+        font-size: 48px;
+      }
+
+      .modal-title {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
@@ -585,13 +689,6 @@
       <div class="header">
         <h1>🔴 Chudmaxxing</h1>
         <p>How much of a chud were you today? Submit your stats to find out.</p>
-      </div>
-
-      <div class="tier-card" id="result-card">
-        <div class="tier-name" id="tier-name"></div>
-        <div class="tier-score" id="score-display"></div>
-        <div class="tier-desc" id="tier-desc"></div>
-        <div class="bar-wrap"><div class="bar-fill" id="score-bar" style="width:0%;"></div></div>
       </div>
 
       <div class="section-title">📊 Daily Metrics</div>
@@ -738,10 +835,23 @@
       <div class="section-title">🏆 Leaderboard</div>
       <div class="friends" id="friends-list"></div>
 
-      <button class="share-btn" id="share-btn" onclick="shareScore()">
-        <i class="ti ti-share" aria-hidden="true"></i>
-        Share My Chud Score
-      </button>
+    </div>
+  </div>
+
+  <!-- Score Reveal Modal -->
+  <div class="modal-overlay" id="scoreModal">
+    <div class="modal">
+      <span class="modal-emoji" id="modalEmoji">🔴</span>
+      <div class="modal-title" id="modalScore">0</div>
+      <div class="modal-tier" id="modalTierName">Normie</div>
+      <div class="modal-message" id="modalMessage">You went outside and talked to people. Disgusting.</div>
+      <div class="modal-message funny-message" id="funnyMessage"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-primary" onclick="shareScore()">
+          <i class="ti ti-share" aria-hidden="true"></i> Share Score
+        </button>
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -749,12 +859,12 @@
 
   <script>
     const tiers = [
-      { min:0,   max:19,  name:"Normie",           desc:"You went outside and talked to people. Disgusting.",     selfDep:"a functioning member of society (embarrassing)",     color:"#10B981", bar:"#34D399" },
-      { min:20,  max:39,  name:"Basement Dweller", desc:"Showing promise. Touch less grass.",                     selfDep:"a Basement Dweller in training",                     color:"#0EA5E9", bar:"#38BDF8" },
-      { min:40,  max:59,  name:"Couch King",        desc:"The couch has learned your shape.",                    selfDep:"a certified Couch King. The cushions fear me",       color:"#8B5CF6", bar:"#A78BFA" },
-      { min:60,  max:79,  name:"Cave Troll",        desc:"Sunlight is a distant memory.",                        selfDep:"a full Cave Troll. Vitamin D is a myth",             color:"#F59E0B", bar:"#FCD34D" },
-      { min:80,  max:99,  name:"Omega Chud",        desc:"Your mom asked if you're still alive.",                selfDep:"an Omega Chud. My mom slid food under the door",     color:"#EF4444", bar:"#F87171" },
-      { min:100, max:100, name:"Legendary Chud",    desc:"A perfect score. We are not proud of you.",            selfDep:"a Legendary Chud. Scientists want to study me",      color:"#7C3AED", bar:"#A78BFA" },
+      { min:0,   max:19,  name:"Normie",           desc:"You went outside and talked to people. Disgusting.",     selfDep:"a functioning member of society (embarrassing)",     color:"#10B981", bar:"#34D399", emoji:"😇" },
+      { min:20,  max:39,  name:"Basement Dweller", desc:"Showing promise. Touch less grass.",                     selfDep:"a Basement Dweller in training",                     color:"#0EA5E9", bar:"#38BDF8", emoji:"🏚️" },
+      { min:40,  max:59,  name:"Couch King",        desc:"The couch has learned your shape.",                    selfDep:"a certified Couch King. The cushions fear me",       color:"#8B5CF6", bar:"#A78BFA", emoji:"🛋️" },
+      { min:60,  max:79,  name:"Cave Troll",        desc:"Sunlight is a distant memory.",                        selfDep:"a full Cave Troll. Vitamin D is a myth",             color:"#F59E0B", bar:"#FCD34D", emoji:"🗻" },
+      { min:80,  max:99,  name:"Omega Chud",        desc:"Your mom asked if you're still alive.",                selfDep:"an Omega Chud. My mom slid food under the door",     color:"#EF4444", bar:"#F87171", emoji:"👑" },
+      { min:100, max:100, name:"Legendary Chud",    desc:"A perfect score. We are not proud of you.",            selfDep:"a Legendary Chud. Scientists want to study me",      color:"#7C3AED", bar:"#A78BFA", emoji:"💀" },
     ];
 
     const friends = [
@@ -763,6 +873,21 @@
       { name:"You",             score:0,  tier:"Not submitted yet", initials:"ME", bg:"#3B82F6", col:"#FFFFFF", isYou:true },
       { name:"GremlinKing",     score:55, tier:"Couch King",        initials:"GK", bg:"#8B5CF6", col:"#FFFFFF" },
       { name:"DaylightAllergy", score:33, tier:"Basement Dweller",  initials:"DA", bg:"#0EA5E9", col:"#FFFFFF" },
+    ];
+
+    const funnyMessages = [
+      "Your mom's gonna be so disappointed...",
+      "Touch grass? More like REFUSE grass.",
+      "This is what peak performance looks like.",
+      "Scientists hate this one weird trick!",
+      "Sunlight? I don't know her.",
+      "Your ex is probably doing better.",
+      "The shower called... it's scared of you.",
+      "Gordon Ramsay would weep at these meals.",
+      "Your ancestors are rolling in their graves.",
+      "This is what commitment looks like.",
+      "Congratulations on your achievement (we're not sure which one).",
+      "Your therapist would need a therapist.",
     ];
 
     const sliderLabels = ["Pure salad energy","Mostly virtuous","Borderline decent","Neutral slop","Heading somewhere bad","Concerning choices","Definite slop","Heavy slop","Deep slop territory","Almost goy slop","Full goy slop"];
@@ -838,19 +963,28 @@
       currentScore = Math.min(100, Math.max(0, Math.round(score)));
       currentTier = getTier(currentScore);
 
-      document.getElementById('score-display').textContent = currentScore;
-      document.getElementById('score-display').style.color = currentTier.color;
-      document.getElementById('tier-name').textContent = currentTier.name;
-      document.getElementById('tier-desc').textContent = currentTier.desc;
-      document.getElementById('score-bar').style.width = currentScore + '%';
-      document.getElementById('score-bar').style.background = currentTier.bar;
-      document.getElementById('result-card').classList.add('visible');
-      document.getElementById('share-btn').classList.add('visible');
-
       friends.find(f => f.isYou).score = currentScore;
       friends.find(f => f.isYou).tier = currentTier.name;
       renderFriends();
-      document.getElementById('result-card').scrollIntoView({ behavior:'smooth', block:'nearest' });
+      
+      showScoreModal();
+    }
+
+    function showScoreModal() {
+      document.getElementById('modalEmoji').textContent = currentTier.emoji;
+      document.getElementById('modalScore').textContent = currentScore;
+      document.getElementById('modalTierName').textContent = currentTier.name;
+      document.getElementById('modalTierName').style.color = currentTier.color;
+      document.getElementById('modalMessage').textContent = currentTier.desc;
+      
+      const randomFunny = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+      document.getElementById('funnyMessage').textContent = `"${randomFunny}"`;
+      
+      document.getElementById('scoreModal').classList.add('visible');
+    }
+
+    function closeModal() {
+      document.getElementById('scoreModal').classList.remove('visible');
     }
 
     function renderFriends() {
@@ -872,7 +1006,10 @@
       const siteUrl = 'https://ohyouchudmaxx.github.io/chud-score-tracker';
       const text = `I am ${currentTier.selfDep}.\n\nMy Chudmaxxing score today: ${currentScore}/100\n"${currentTier.desc}"\n\nVisit ${siteUrl} to determine your own Chud score.`;
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => showToast('Copied! Go share your shame.'));
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Copied! Go share your shame.');
+          closeModal();
+        });
       } else {
         showToast('Score: ' + currentScore + ' — ' + currentTier.name);
       }
@@ -884,6 +1021,13 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2800);
     }
+
+    // Close modal when clicking outside
+    document.getElementById('scoreModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
 
     renderFriends();
   </script>
